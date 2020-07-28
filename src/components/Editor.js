@@ -10,20 +10,19 @@ import {
 import Editor from "draft-js-plugins-editor";
 import "draft-js/dist/Draft.css";
 import styled from "styled-components";
-import { blockTypeButtons, inlineStyleButtons } from "../fixtures";
 import createHighlightPlugin from "./plugins/highlightPlugin";
 import basicTextStylePlugin from "./plugins/textStylePlugins";
 import basicBlockStylePlugin from "./plugins/blockStylePlugins";
 import { AiOutlineUnorderedList, AiOutlineOrderedList } from "react-icons/ai";
 import { GrBlockQuote } from "react-icons/gr";
+import { blockTypeButtons, inlineStyleButtons } from "../fixtures";
+import { Button } from "./";
 
 const icons = { AiOutlineUnorderedList, AiOutlineOrderedList, GrBlockQuote };
 const highlightPlugin = createHighlightPlugin();
 
 const EditorContainer = styled.div`
   height: 100%;
-  /* margin: 0em; */
-  /* padding: 2em; */
   color: #2c3a51;
   text-align: left;
   overflow-y: hidden;
@@ -53,7 +52,6 @@ const EditorContainer = styled.div`
     color: #4563eb;
     background-color: transparent;
     text-overflow: ellipsis;
-    /* position: inline; */
     padding: 0.5rem;
     margin-bottom: 2rem;
     outline: none;
@@ -104,6 +102,7 @@ const StyledEditor = styled.div`
   width: 100%;
   overflow: scroll;
 `;
+
 const CustomEditor = (props) => {
   const styleMap = {
     HIGHLIGHT: {
@@ -274,19 +273,23 @@ const CustomEditor = (props) => {
     ) {
       alert("Note cannot be saved if title or body is blank");
     } else {
-      console.log(note, props.displayedNote);
       note["body"] = JSON.stringify(note.body);
       await setTitle("");
       await setEditorState(EditorState.createEmpty());
       if (displayedNote === "new") {
-        console.log(note, "a new note");
         props.createNote({
           variables: { title: note.title, body: note.body, date: Date.now() },
         });
+      } else {
+        console.log(note, "hmmm??");
+        props.updateNote({
+          variables: {
+            _id: displayedNote._id,
+            title: note.title,
+            body: note.body,
+          },
+        });
       }
-      // } else {
-      //   props.updateNote(displayedNote?.id, note.title, note.body);
-      // }
     }
   };
 
@@ -305,9 +308,9 @@ const CustomEditor = (props) => {
           return renderBlockButton(button.value, button.block);
         })}
       </Toolbar>
-      <button className="submitNote" onClick={submitEditor}>
-        Save
-      </button>
+      <Button position="absolute" right="1rem" onClick={submitEditor}>
+        {props.displayedNote === "new" ? "Save" : "edit"}
+      </Button>
       <span className="noteTitle">
         <input
           type="text"

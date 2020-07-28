@@ -4,17 +4,15 @@ import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import { CustomEditor } from "../components";
 
-const Container = styled.div`
+export const Container = styled.div`
   width: 100%;
   height: 100%;
   overflow: hidden;
   padding: 1rem;
+  grid-area: 2/2/-1/-1;
 `;
 
 const NewNote = ({ displayedNote }) => {
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-
   const [createNote] = useMutation(NEW_NOTE, {
     update(cache, { data: { createNote } }) {
       const { allNotes } = cache.readQuery({ query: NOTES_QUERY });

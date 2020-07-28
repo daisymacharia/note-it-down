@@ -6,7 +6,7 @@ import {
   MdSettings as Settings,
   MdChatBubble as ChatBubble,
 } from "react-icons/md";
-// import { Avatar } from "../components";
+import { Avatar } from "../components";
 
 const StyledSidebar = styled.div`
   height: 100vh;
@@ -92,7 +92,7 @@ export default function Sidebar() {
             <Settings />
           </MenuItem>
         </SidebarMenu>
-        {/* <Avatar width="2rem" height="2rem"></Avatar> */}
+        <Avatar width="2rem" height="2rem"></Avatar>
       </Wrapper>
     </StyledSidebar>
   );

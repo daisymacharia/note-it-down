@@ -1,9 +1,11 @@
 import React from "react";
 import styled from "styled-components";
 import Moment from "react-moment";
+import { Search } from "../components";
 
 const NotesContainer = styled.div`
   display: flex;
+  grid-area: 1/1/-1/2;
   flex-direction: column;
   width: 100%;
   height: 100%;
@@ -19,14 +21,18 @@ const Wrapper = styled.div`
 
 const NoteCard = styled.button`
   display: grid;
-  grid-template-columns: 8rem 1fr;
+  grid-template-columns: minmax(5rem, 1fr) 2fr;
+  width: 100%;
   height: 8rem;
   border: none;
   border-top: ${(props) => props.theme.border};
   background-color: transparent;
+  outline: none;
 
   &:hover {
-    background-color: #f7f7f7;
+    background-color: #4563eb;
+    box-shadow: 0px 1px #e6e9ec;
+    color: #f9f9f9;
   }
 
   &:last-child {
@@ -57,15 +63,15 @@ const Header = styled.div`
 `;
 
 const AllNotes = ({ data, selectNote }) => {
-  console.log(data);
   return (
     <NotesContainer>
+      <Search />
       <Header>
         <h1> All Notes </h1>
       </Header>
       <Wrapper>
         {data.allNotes.map((note) => (
-          <NoteCard key={note._id} onClick={(e, note) => selectNote(e, note)}>
+          <NoteCard key={note._id} onClick={() => selectNote(note)}>
             <DateContainer>
               <h2>
                 <Moment format="dddd" date={note.date} />
@@ -74,7 +80,6 @@ const AllNotes = ({ data, selectNote }) => {
             </DateContainer>
             <ContentContainer>
               <h2>{note.title}</h2>
-              {/* <p>{note.2body}</p> */}
             </ContentContainer>
           </NoteCard>
         ))}
