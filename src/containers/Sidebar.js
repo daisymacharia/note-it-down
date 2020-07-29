@@ -1,8 +1,6 @@
 import React from "react";
 import styled from "styled-components";
 import {
-  MdDashboard as Dashboard,
-  MdPieChart as PieChart,
   MdSettings as Settings,
   MdChatBubble as ChatBubble,
 } from "react-icons/md";
@@ -79,16 +77,10 @@ export default function Sidebar() {
       <Wrapper>
         <Logo />
         <SidebarMenu>
-          <MenuItem active={true}>
-            <Dashboard />
-          </MenuItem>
-          <MenuItem>
-            <PieChart />
-          </MenuItem>
           <MenuItem>
             <ChatBubble />
           </MenuItem>
-          <MenuItem>
+          <MenuItem active={true}>
             <Settings />
           </MenuItem>
         </SidebarMenu>

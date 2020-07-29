@@ -1,8 +1,9 @@
 import React from "react";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import styled, { ThemeProvider } from "styled-components";
-import { AllNotes, NewNote, Sidebar, Page } from "./containers";
+import { Sidebar, Page } from "./containers";
 import theme from "./theme";
+import { withAuthenticationRequired } from "@auth0/auth0-react";
 
 const PageContainer = styled.div`
   display: grid;
@@ -10,7 +11,7 @@ const PageContainer = styled.div`
   grid-template-rows: 100vh;
 `;
 
-export default function App() {
+function App() {
   return (
     <Router>
       <ThemeProvider theme={theme}>
@@ -23,3 +24,4 @@ export default function App() {
     </Router>
   );
 }
+export default withAuthenticationRequired(App);

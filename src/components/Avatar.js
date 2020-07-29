@@ -6,11 +6,13 @@ const StyledImg = styled.div`
   height: 2rem;
   width: 2rem;
   border-radius: 20%;
+  background-color: #4563eb;
 
   img {
     width: 100%;
     height: 100%;
     border-radius: 20%;
+    background-color: transparent;
   }
 `;
 export const Avatar = () => {

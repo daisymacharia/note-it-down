@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 
 const SearchInput = styled.input`
@@ -9,8 +9,24 @@ const SearchInput = styled.input`
   padding: 0 1rem;
   background: transparent;
 `;
-const Search = () => {
-  return <SearchInput placeholder="Search notes here" />;
+
+const Search = ({ handleKeyDown }) => {
+  const [searchValue, setValue] = useState("");
+
+  const handleChange = (event) => {
+    event.preventDefault();
+    let value = event.target.value;
+    setValue(value);
+  };
+
+  return (
+    <SearchInput
+      value={searchValue}
+      onChange={handleChange}
+      onKeyDown={(e) => handleKeyDown(e, searchValue)}
+      placeholder="Search notes here"
+    />
+  );
 };
 
 export default Search;

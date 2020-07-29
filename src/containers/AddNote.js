@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { useMutation } from "@apollo/react-hooks";
+import { withAuthenticationRequired } from "@auth0/auth0-react";
 import gql from "graphql-tag";
 import { CustomEditor } from "../components";
 
@@ -30,14 +31,30 @@ const NewNote = ({ displayedNote }) => {
   );
 };
 
-export default NewNote;
+export default withAuthenticationRequired(NewNote);
 
 const NEW_NOTE = gql`
-  mutation createNote($title: String!, $body: String!) {
-    createNote(input: { title: $title, body: $body }) {
+  mutation createNote(
+    $organization: String!
+    $participants: [PersonInput]!
+    $title: String!
+    $body: String!
+  ) {
+    createNote(
+      input: {
+        organization: $organization
+        participants: $participants
+        title: $title
+        body: $body
+      }
+    ) {
       _id
       title
       body
+      participants {
+        name
+      }
+      organization
       date
     }
   }
@@ -46,9 +63,13 @@ const NEW_NOTE = gql`
 const NOTES_QUERY = gql`
   {
     allNotes {
+      _id
       title
       body
-      _id
+      participants {
+        name
+      }
+      organization
       date
     }
   }

@@ -3,35 +3,24 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
-import { ApolloProvider } from "@apollo/react-hooks";
-import { ApolloClient } from "apollo-client";
-import { createHttpLink } from "apollo-link-http";
-import { ApolloLink } from "apollo-link";
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { onError } from "apollo-link-error";
+import { AuthorizedApolloProvider } from "./containers";
 import { Auth0Provider } from "@auth0/auth0-react";
 
-const errorLink = onError(({ graphQLErrors }) => {
-  if (graphQLErrors)
-    graphQLErrors.map(({ message }) => console.log(message, "error"));
-});
-
-const httpLink = createHttpLink({ uri: "http://localhost:4300/graphql" });
-const link = ApolloLink.from([httpLink, errorLink]);
-const client = new ApolloClient({
-  link,
-  cache: new InMemoryCache(),
-});
+const domain = process.env.REACT_APP_AUTH0_DOMAIN;
+const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
 
 ReactDOM.render(
   <Auth0Provider
-    domain="dev-j40kbp98.us.auth0.com"
-    clientId="vYnxZIteT4plgr77PgEiW3HR4O1NrgkE"
+    domain={domain}
+    clientId={clientId}
     redirectUri={window.location.origin}
+    audience="http://note-taking-api/"
+    scope="read:current_user update:current_user_metadata"
+    useRefreshTokens={true}
   >
-    <ApolloProvider client={client}>
+    <AuthorizedApolloProvider>
       <App />
-    </ApolloProvider>
+    </AuthorizedApolloProvider>
   </Auth0Provider>,
   document.getElementById("root")
 );

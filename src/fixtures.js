@@ -68,4 +68,12 @@ const blockTypeButtons = [
   },
 ];
 
-export { blockTypeButtons, inlineStyleButtons };
+const SampleParticipants = [
+  { key: "1", name: "Daisy Macharia", department: "IT" },
+  { key: "2", name: "Jane Doe", department: "OPS" },
+  { key: "3", name: "John Doe", department: "HR" },
+  { key: "4", name: "Janice Ndungu", department: "IT" },
+  { key: "5", name: "Joe Macharia", department: "OPS" },
+];
+
+export { blockTypeButtons, inlineStyleButtons, SampleParticipants };

@@ -13,10 +13,14 @@ import styled from "styled-components";
 import createHighlightPlugin from "./plugins/highlightPlugin";
 import basicTextStylePlugin from "./plugins/textStylePlugins";
 import basicBlockStylePlugin from "./plugins/blockStylePlugins";
-import { AiOutlineUnorderedList, AiOutlineOrderedList } from "react-icons/ai";
+import {
+  AiOutlineUnorderedList,
+  AiOutlineOrderedList,
+  AiFillDelete,
+} from "react-icons/ai";
 import { GrBlockQuote } from "react-icons/gr";
 import { blockTypeButtons, inlineStyleButtons } from "../fixtures";
-import { Button } from "./";
+import { Button, Multiselect } from "./";
 
 const icons = { AiOutlineUnorderedList, AiOutlineOrderedList, GrBlockQuote };
 const highlightPlugin = createHighlightPlugin();
@@ -46,7 +50,6 @@ const EditorContainer = styled.div`
     line-height: 0.5rem;
     height: 3rem;
     letter-spacing: 0.7px;
-    font-family: "Open Sans";
     border: none;
     width: 80%;
     color: #4563eb;
@@ -55,6 +58,20 @@ const EditorContainer = styled.div`
     padding: 0.5rem;
     margin-bottom: 2rem;
     outline: none;
+  }
+
+  .organization {
+    height: 3rem;
+    font-size: 1.5rem;
+    border: none;
+    background-color: transparent;
+    outline: none;
+  }
+
+  .wrapper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
   }
 `;
 
@@ -80,6 +97,19 @@ const Toolbar = styled.div`
   svg.active {
     background-color: #4563eb;
     border-color: transparent;
+  }
+`;
+
+const AbsoluteButtons = styled.div`
+  display: flex;
+  position: absolute;
+  right: 1rem;
+  align-items: center;
+
+  svg {
+    font-size: 1.5rem;
+    fill: #4563eb;
+    margin-right: 1rem;
   }
 `;
 
@@ -116,13 +146,19 @@ const CustomEditor = (props) => {
     EditorState.createEmpty()
   );
   const [title, setTitle] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [participants, setParticipants] = useState([]);
 
   useEffect(() => {
     let displayedNote = props.displayedNote;
     if (typeof displayedNote == "object") {
       let rawContentFromFile = displayedNote;
       let persistedTitle = displayedNote.title;
+      let persistedOrganization = displayedNote.organization;
+      let persistedParticipants = displayedNote.participants;
       setTitle(persistedTitle);
+      setOrganization(persistedOrganization);
+      setParticipants(persistedParticipants);
       setEditorState(
         EditorState.createWithContent(
           convertFromRaw(JSON.parse(rawContentFromFile.body))
@@ -130,6 +166,8 @@ const CustomEditor = (props) => {
       );
     } else {
       setTitle("");
+      setOrganization("");
+      setParticipants([]);
       setEditorState(EditorState.createEmpty());
     }
   }, [props.displayedNote]);
@@ -138,6 +176,23 @@ const CustomEditor = (props) => {
     event.preventDefault();
     let value = event.target.value;
     setTitle(value);
+  };
+
+  const captureOrganization = (event) => {
+    event.preventDefault();
+    let value = event.target.value;
+    setOrganization(value);
+  };
+
+  const onSelectParticipant = (selectedItem) => {
+    setParticipants(selectedItem);
+  };
+
+  const onRemoveParticipant = (selectedItem) => {
+    let selectedList = participants.filter(
+      (element) => element.key === selectedItem.key
+    );
+    setParticipants(selectedItem);
   };
 
   const toggleInlineStyle = (event) => {
@@ -154,30 +209,22 @@ const CustomEditor = (props) => {
   };
 
   const handleKeyCommand = (command) => {
-    const newState = RichUtils.handleKeyCommand(editorState, command);
-    if (newState) {
+    // inline formatting key commands handles bold, italic, code, underline
+    let EditorState = RichUtils.handleKeyCommand(editorState, command);
+    if (!EditorState && command === "strikethrough") {
+      EditorState = RichUtils.toggleInlineStyle(editorState, "STRIKETHROUGH");
+    }
+    if (!EditorState && command === "highlight") {
+      EditorState = RichUtils.toggleInlineStyle(editorState, "HIGHLIGHT");
+    }
+
+    if (EditorState) {
       setEditorState(EditorState);
       return "handled";
     }
+
     return "not-handled";
   };
-  // const handleKeyCommand = (command) => {
-  //   // inline formatting key commands handles bold, italic, code, underline
-  //   let EditorState = RichUtils.handleKeyCommand(editorState, command);
-  //   if (!EditorState && command === "strikethrough") {
-  //     EditorState = RichUtils.toggleInlineStyle(editorState, "STRIKETHROUGH");
-  //   }
-  //   if (!EditorState && command === "highlight") {
-  //     EditorState = RichUtils.toggleInlineStyle(editorState, "HIGHLIGHT");
-  //   }
-
-  //   if (EditorState) {
-  //     setEditorState(EditorState);
-  //     return "handled";
-  //   }
-
-  //   return "not-handled";
-  // };
 
   const keyBindingFunction = (event) => {
     if (
@@ -264,7 +311,12 @@ const CustomEditor = (props) => {
   const submitEditor = async () => {
     let displayedNote = props.displayedNote;
     let contentState = editorState.getCurrentContent();
-    let note = { title: title, body: convertToRaw(contentState) };
+    let note = {
+      title: title,
+      participants: participants,
+      organization: organization,
+      body: convertToRaw(contentState),
+    };
     if (
       title === "" ||
       (note.body.blocks.length <= 1 &&
@@ -276,21 +328,35 @@ const CustomEditor = (props) => {
       note["body"] = JSON.stringify(note.body);
       await setTitle("");
       await setEditorState(EditorState.createEmpty());
+      await setOrganization("");
+      await setParticipants([]);
+
       if (displayedNote === "new") {
         props.createNote({
-          variables: { title: note.title, body: note.body, date: Date.now() },
-        });
-      } else {
-        console.log(note, "hmmm??");
-        props.updateNote({
           variables: {
-            _id: displayedNote._id,
+            participants: note.participants,
+            organization: note.organization,
             title: note.title,
             body: note.body,
+            date: Date.now(),
           },
         });
+        // } else {
+        //   props.updateNote({
+        //     variables: {
+        //       _id: displayedNote._id,
+        //       participants: note.participants,
+        //       organization: note.organization,
+        //       title: note.title,
+        //       body: note.body,
+        //     },
+        //   });
       }
     }
+  };
+
+  const deletenote = async () => {
+    await props.deleteNote({ variables: { _id: props.displayedNote._id } });
   };
 
   return (
@@ -308,9 +374,12 @@ const CustomEditor = (props) => {
           return renderBlockButton(button.value, button.block);
         })}
       </Toolbar>
-      <Button position="absolute" right="1rem" onClick={submitEditor}>
-        {props.displayedNote === "new" ? "Save" : "edit"}
-      </Button>
+      <AbsoluteButtons>
+        {props.displayedNote !== "new" && <AiFillDelete onClick={deletenote} />}
+        <Button onClick={submitEditor}>
+          {props.displayedNote === "new" ? "Save" : "edit"}
+        </Button>
+      </AbsoluteButtons>
       <span className="noteTitle">
         <input
           type="text"
@@ -321,6 +390,21 @@ const CustomEditor = (props) => {
           onChange={captureTitle}
         />
       </span>
+      <span className="wrapper">
+        <input
+          type="text"
+          placeholder="Organization name"
+          className="organization"
+          value={organization}
+          onChange={captureOrganization}
+        />
+        <Multiselect
+          onSelect={onSelectParticipant}
+          onRemove={onRemoveParticipant}
+          selectedValues={participants}
+        />
+      </span>
+
       <StyledEditor>
         <Editor
           customStyleMap={styleMap}

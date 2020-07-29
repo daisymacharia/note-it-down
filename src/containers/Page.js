@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { useQuery } from "@apollo/react-hooks";
+import { useQuery, useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
-import { Login } from "../components";
+import { useAuth0 } from "@auth0/auth0-react";
+import { Link } from "react-router-dom";
+import { Login, Logout } from "../components";
 import { AllNotes, UpdateNote, NewNote } from "./";
 
 const PageWrapper = styled.div`
@@ -41,8 +43,20 @@ const LoginWrapper = styled.div`
 `;
 
 const Page = () => {
+  const { isAuthenticated } = useAuth0();
   const [displayedNote, setDisplayedNote] = useState("new");
   const { loading, error, data } = useQuery(NOTES_QUERY);
+
+  const [deleteNote] = useMutation(DELETE_NOTE_QUERY, {
+    update(cache, { data: { deleteNote } }) {
+      const { allNotes } = cache.readQuery({ query: NOTES_QUERY });
+      const newNotes = allNotes.filter((note) => note._id !== deleteNote._id);
+      cache.writeQuery({
+        query: NOTES_QUERY,
+        data: { allNotes: newNotes },
+      });
+    },
+  });
 
   useEffect(() => {
     if (data?.allNotes.length === 0) {
@@ -69,23 +83,21 @@ const Page = () => {
     setDisplayedNote("new");
   };
 
-  if (loading) return "Loading...";
+  if (loading) return <PageWrapper>Loading...</PageWrapper>;
   if (error) return `Error! ${error.message}`;
 
   return (
     <PageWrapper>
-      <LoginWrapper>
-        <Login />
-      </LoginWrapper>
+      <LoginWrapper>{isAuthenticated ? <Logout /> : <Login />}</LoginWrapper>
       <RightWrapper>
         <AddNoteButton onClick={addNote}>+</AddNoteButton>
-        <AllNotes data={data} selectNote={selectNote} />
+        <AllNotes notes={data} selectNote={selectNote} />
       </RightWrapper>
 
       {displayedNote === "new" ? (
         <NewNote displayedNote={displayedNote} />
       ) : (
-        <UpdateNote editNote={displayedNote} />
+        <UpdateNote deleteNote={deleteNote} displayedNote={displayedNote} />
       )}
     </PageWrapper>
   );
@@ -99,6 +111,25 @@ const NOTES_QUERY = gql`
       title
       body
       _id
+      date
+      participants {
+        name
+      }
+      organization
+    }
+  }
+`;
+
+const DELETE_NOTE_QUERY = gql`
+  mutation deleteNote($_id: ID!) {
+    deleteNote(_id: $_id) {
+      _id
+      title
+      body
+      participants {
+        name
+      }
+      organization
       date
     }
   }
