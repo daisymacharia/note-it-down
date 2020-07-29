@@ -3,11 +3,25 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
+import { AuthorizedApolloProvider } from "./containers";
+import { Auth0Provider } from "@auth0/auth0-react";
+
+const domain = process.env.REACT_APP_AUTH0_DOMAIN;
+const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <Auth0Provider
+    domain={domain}
+    clientId={clientId}
+    redirectUri={window.location.origin}
+    audience="http://note-taking-api/"
+    scope="read:current_user update:current_user_metadata"
+    useRefreshTokens={true}
+  >
+    <AuthorizedApolloProvider>
+      <App />
+    </AuthorizedApolloProvider>
+  </Auth0Provider>,
   document.getElementById("root")
 );
 
