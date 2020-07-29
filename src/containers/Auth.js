@@ -16,7 +16,7 @@ const AuthorizedApolloProvider = ({ children }) => {
   });
 
   const httpLink = createHttpLink({
-    uri: "http://localhost:4300/graphql",
+    uri: "https://custom-note-taking.herokuapp.com/graphql",
     fetchOptions: { credentials: "include" },
   });
 
