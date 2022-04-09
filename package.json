@@ -18,7 +18,7 @@
     "draft-js-plugins-editor": "^3.0.0",
     "graphql": "^15.3.0",
     "graphql-tag": "^2.10.4",
-    "moment": "^2.27.0",
+    "moment": "^2.29.2",
     "multiselect-react-dropdown": "^1.5.7",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
